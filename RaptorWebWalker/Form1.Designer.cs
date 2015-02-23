@@ -73,6 +73,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Name = "frmMain";
             this.TransparencyKey = System.Drawing.Color.Maroon;
+            this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
