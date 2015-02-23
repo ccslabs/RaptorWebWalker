@@ -37,6 +37,7 @@ namespace RaptorWebWalker
             tcpClient.errEncounter += tcpClient_errEncounter;
 
             tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+            
         }
 
     
