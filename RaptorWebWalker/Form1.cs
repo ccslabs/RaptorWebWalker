@@ -8,10 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using NetComm;
+
 namespace RaptorWebWalker
 {
     public partial class frmMain : Form
     {
+        NetComm.Client tcpClient = new Client();
+
         public frmMain()
         {
             InitializeComponent();
