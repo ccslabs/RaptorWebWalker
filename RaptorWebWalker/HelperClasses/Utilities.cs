@@ -14,5 +14,15 @@ namespace RaptorWebWalker.HelperClasses
            return TimeSpan.FromSeconds(seconds).ToString();
         }
 
+        internal string GetString(byte[] data)
+        {
+            return Encoding.UTF8.GetString(data, 0, data.Length);
+        }
+
+        internal byte[] GetBytes(string data)
+        {
+            return Encoding.UTF8.GetBytes(data);
+        }
+
     }
 }

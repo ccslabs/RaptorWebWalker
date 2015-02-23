@@ -129,12 +129,12 @@
             // lblLicenseNumber
             // 
             this.lblLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblLicenseNumber.AutoSize = true;
-            this.lblLicenseNumber.Location = new System.Drawing.Point(487, 180);
+            this.lblLicenseNumber.Location = new System.Drawing.Point(193, 180);
             this.lblLicenseNumber.Name = "lblLicenseNumber";
-            this.lblLicenseNumber.Size = new System.Drawing.Size(47, 13);
+            this.lblLicenseNumber.Size = new System.Drawing.Size(341, 13);
             this.lblLicenseNumber.TabIndex = 11;
             this.lblLicenseNumber.Text = "License:";
+            this.lblLicenseNumber.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // timerSeconds
             // 
