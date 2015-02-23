@@ -25,6 +25,7 @@ namespace RaptorWebWalker
 
         private double SecondsPastSinceBoot = 0;
         private double totalRunTime = 0;
+        private double PreviousTotalRuntime = 0;
 
 
         public frmMain()
@@ -67,7 +68,9 @@ namespace RaptorWebWalker
             throw new NotImplementedException();
         }
 
-        private void Log(string message)
+
+        #region Logging
+private void Log(string message)
         {
             lblStatus.Text = message;
             if (message.ToLowerInvariant().StartsWith("error"))
@@ -113,6 +116,7 @@ namespace RaptorWebWalker
                 return CurrentLogFileName;
             }
         }
+        #endregion        
 
         #region Save and Load Settings
 
@@ -127,8 +131,8 @@ namespace RaptorWebWalker
                 sr = new StreamReader(fs);
 
                 myClientID = sr.ReadLine();
-                if (!Double.TryParse(sr.ReadLine(), out totalRunTime))
-                    totalRunTime = 0;
+                if (!Double.TryParse(sr.ReadLine(), out PreviousTotalRuntime))
+                    PreviousTotalRuntime = 0;
                       
 
                 sr.Close();
@@ -192,9 +196,15 @@ namespace RaptorWebWalker
         private void timerSeconds_Tick(object sender, EventArgs e)
         {
             SecondsPastSinceBoot++;
-
+            totalRunTime = SecondsPastSinceBoot + PreviousTotalRuntime;
             lblRuntimeSinceLastBoot.Text = utils.SecondsToDHMS(SecondsPastSinceBoot);
-            lblTotalRuntime.Text = utils.SecondsToDHMS(SecondsPastSinceBoot + totalRunTime);
+            lblTotalRuntime.Text = utils.SecondsToDHMS(totalRunTime);
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            tcpClient.Disconnect();
+            SaveSettings();
         }
 
     }
