@@ -61,6 +61,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
+            this.lblLicenseNumber = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.customGroupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -69,7 +70,7 @@
             // 
             this.lblAuthorized.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblAuthorized.AutoSize = true;
-            this.lblAuthorized.Location = new System.Drawing.Point(190, 152);
+            this.lblAuthorized.Location = new System.Drawing.Point(190, 163);
             this.lblAuthorized.Name = "lblAuthorized";
             this.lblAuthorized.Size = new System.Drawing.Size(79, 13);
             this.lblAuthorized.TabIndex = 1;
@@ -79,7 +80,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(259, 152);
+            this.label1.Location = new System.Drawing.Point(262, 163);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(275, 13);
             this.label1.TabIndex = 2;
@@ -380,7 +381,7 @@
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(66, 134);
+            this.label3.Location = new System.Drawing.Point(69, 137);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(40, 13);
             this.label3.TabIndex = 9;
@@ -391,18 +392,29 @@
             this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblStatus.AutoEllipsis = true;
             this.lblStatus.ForeColor = System.Drawing.Color.White;
-            this.lblStatus.Location = new System.Drawing.Point(112, 134);
+            this.lblStatus.Location = new System.Drawing.Point(115, 137);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(422, 13);
             this.lblStatus.TabIndex = 10;
             this.lblStatus.Text = "...";
+            // 
+            // lblLicenseNumber
+            // 
+            this.lblLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblLicenseNumber.AutoSize = true;
+            this.lblLicenseNumber.Location = new System.Drawing.Point(487, 150);
+            this.lblLicenseNumber.Name = "lblLicenseNumber";
+            this.lblLicenseNumber.Size = new System.Drawing.Size(47, 13);
+            this.lblLicenseNumber.TabIndex = 11;
+            this.lblLicenseNumber.Text = "License:";
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Maroon;
-            this.ClientSize = new System.Drawing.Size(546, 176);
+            this.ClientSize = new System.Drawing.Size(546, 185);
+            this.Controls.Add(this.lblLicenseNumber);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.customGroupBox1);
@@ -456,6 +468,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Label lblLicenseNumber;
     }
 }
 
