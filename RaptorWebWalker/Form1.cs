@@ -10,15 +10,23 @@ using System.Windows.Forms;
 
 using NetComm;
 using System.IO;
+using RaptorWebWalker.HelperClasses;
 
 namespace RaptorWebWalker
 {
     public partial class frmMain : Form
     {
         NetComm.Client tcpClient = new Client();
+        Utilities utils = new Utilities();
 
         private string myClientID = "";
         private string pathSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"RaptorWebWalker"); // This is the Settings Folder Path
+        private string CurrentLogFileName = "";
+
+        private double SecondsPastSinceBoot = 0;
+        private double totalRunTime = 0;
+
+
         public frmMain()
         {
             InitializeComponent();
@@ -59,6 +67,52 @@ namespace RaptorWebWalker
             throw new NotImplementedException();
         }
 
+        private void Log(string message)
+        {
+            lblStatus.Text = message;
+            if (message.ToLowerInvariant().StartsWith("error"))
+            {
+                string formattedMessage = DateTime.Now + "\t" + message;
+                SaveLog(formattedMessage);
+            }
+
+        }
+
+        private void SaveLog(string message)
+        {
+            FileStream fs = null;
+            StreamWriter sw = null;
+            string LogFileName = GetLogFileName();
+
+            try
+            {                
+                fs = new FileStream(Path.Combine(pathSettings,LogFileName),FileMode.OpenOrCreate,FileAccess.Write, FileShare.None);
+                sw = new StreamWriter(fs);
+
+                sw.WriteLine(message);
+
+                sw.Close();
+                fs.Close();
+            }
+            catch (Exception)
+            {
+                if (sw != null) sw.Close();
+                if (fs != null) fs.Close();
+                throw;
+            }
+        }
+
+        private string GetLogFileName()
+        {
+            DateTime dt = DateTime.Now;
+            if (CurrentLogFileName.Contains(dt.DayOfWeek.ToString() + dt.Month.ToString() + dt.Year.ToString() + ".rww"))
+                return CurrentLogFileName;
+            else
+            {
+                CurrentLogFileName = dt.DayOfWeek.ToString() + dt.Month.ToString() + dt.Year.ToString() + ".rww";
+                return CurrentLogFileName;
+            }
+        }
 
         #region Save and Load Settings
 
@@ -73,6 +127,9 @@ namespace RaptorWebWalker
                 sr = new StreamReader(fs);
 
                 myClientID = sr.ReadLine();
+                if (!Double.TryParse(sr.ReadLine(), out totalRunTime))
+                    totalRunTime = 0;
+                      
 
                 sr.Close();
                 fs.Close();
@@ -95,6 +152,7 @@ namespace RaptorWebWalker
                 sw = new StreamWriter(fs);
 
                 sw.WriteLine(myClientID);
+                sw.WriteLine(totalRunTime);
 
                 sw.Close();
                 fs.Close();
@@ -126,10 +184,18 @@ namespace RaptorWebWalker
         private bool FirstRun()
         {
             // If the settings folder is missing then we need to Set the Client up
-            return Directory.Exists(pathSettings);
+           return !Directory.Exists(pathSettings); // If the folder exists return FALSE - THIS IS NOT the first run!           
         }
 
         #endregion
+
+        private void timerSeconds_Tick(object sender, EventArgs e)
+        {
+            SecondsPastSinceBoot++;
+
+            lblRuntimeSinceLastBoot.Text = utils.SecondsToDHMS(SecondsPastSinceBoot);
+            lblTotalRuntime.Text = utils.SecondsToDHMS(SecondsPastSinceBoot + totalRunTime);
+        }
 
     }
 }

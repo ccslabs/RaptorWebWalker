@@ -28,10 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lblAuthorized = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lblStatus = new System.Windows.Forms.Label();
+            this.lblLicenseNumber = new System.Windows.Forms.Label();
+            this.timerSeconds = new System.Windows.Forms.Timer(this.components);
             this.customGroupBox1 = new RaptorWebWalker.Controls.CustomGroupBox();
+            this.lblRuntimeSinceLastBoot = new System.Windows.Forms.Label();
+            this.lblTotalRuntime = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
             this.label23 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
@@ -59,9 +69,6 @@
             this.label5 = new System.Windows.Forms.Label();
             this.lblProcessed = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lblStatus = new System.Windows.Forms.Label();
-            this.lblLicenseNumber = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.customGroupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -70,7 +77,7 @@
             // 
             this.lblAuthorized.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblAuthorized.AutoSize = true;
-            this.lblAuthorized.Location = new System.Drawing.Point(190, 163);
+            this.lblAuthorized.Location = new System.Drawing.Point(190, 193);
             this.lblAuthorized.Name = "lblAuthorized";
             this.lblAuthorized.Size = new System.Drawing.Size(79, 13);
             this.lblAuthorized.TabIndex = 1;
@@ -80,7 +87,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(262, 163);
+            this.label1.Location = new System.Drawing.Point(262, 193);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(275, 13);
             this.label1.TabIndex = 2;
@@ -88,6 +95,7 @@
             // 
             // pictureBox1
             // 
+            this.pictureBox1.BackColor = System.Drawing.Color.White;
             this.pictureBox1.Image = global::RaptorWebWalker.Properties.Resources.hand_print_blue;
             this.pictureBox1.Location = new System.Drawing.Point(12, 12);
             this.pictureBox1.Name = "pictureBox1";
@@ -96,9 +104,52 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.Location = new System.Drawing.Point(69, 167);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(40, 13);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "Status:";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblStatus.AutoEllipsis = true;
+            this.lblStatus.ForeColor = System.Drawing.Color.White;
+            this.lblStatus.Location = new System.Drawing.Point(115, 167);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(422, 13);
+            this.lblStatus.TabIndex = 10;
+            this.lblStatus.Text = "...";
+            // 
+            // lblLicenseNumber
+            // 
+            this.lblLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblLicenseNumber.AutoSize = true;
+            this.lblLicenseNumber.Location = new System.Drawing.Point(487, 180);
+            this.lblLicenseNumber.Name = "lblLicenseNumber";
+            this.lblLicenseNumber.Size = new System.Drawing.Size(47, 13);
+            this.lblLicenseNumber.TabIndex = 11;
+            this.lblLicenseNumber.Text = "License:";
+            // 
+            // timerSeconds
+            // 
+            this.timerSeconds.Enabled = true;
+            this.timerSeconds.Interval = 1000;
+            this.timerSeconds.Tick += new System.EventHandler(this.timerSeconds_Tick);
+            // 
             // customGroupBox1
             // 
             this.customGroupBox1.BorderColor = System.Drawing.Color.Black;
+            this.customGroupBox1.Controls.Add(this.lblRuntimeSinceLastBoot);
+            this.customGroupBox1.Controls.Add(this.lblTotalRuntime);
+            this.customGroupBox1.Controls.Add(this.label29);
+            this.customGroupBox1.Controls.Add(this.label28);
+            this.customGroupBox1.Controls.Add(this.label27);
             this.customGroupBox1.Controls.Add(this.label23);
             this.customGroupBox1.Controls.Add(this.label24);
             this.customGroupBox1.Controls.Add(this.label25);
@@ -128,10 +179,55 @@
             this.customGroupBox1.Controls.Add(this.label2);
             this.customGroupBox1.Location = new System.Drawing.Point(72, 12);
             this.customGroupBox1.Name = "customGroupBox1";
-            this.customGroupBox1.Size = new System.Drawing.Size(465, 119);
+            this.customGroupBox1.Size = new System.Drawing.Size(465, 152);
             this.customGroupBox1.TabIndex = 3;
             this.customGroupBox1.TabStop = false;
             this.customGroupBox1.Text = "Information ";
+            // 
+            // lblRuntimeSinceLastBoot
+            // 
+            this.lblRuntimeSinceLastBoot.AutoSize = true;
+            this.lblRuntimeSinceLastBoot.Location = new System.Drawing.Point(214, 121);
+            this.lblRuntimeSinceLastBoot.Name = "lblRuntimeSinceLastBoot";
+            this.lblRuntimeSinceLastBoot.Size = new System.Drawing.Size(13, 13);
+            this.lblRuntimeSinceLastBoot.TabIndex = 64;
+            this.lblRuntimeSinceLastBoot.Text = "0";
+            // 
+            // lblTotalRuntime
+            // 
+            this.lblTotalRuntime.AutoSize = true;
+            this.lblTotalRuntime.Location = new System.Drawing.Point(104, 121);
+            this.lblTotalRuntime.Name = "lblTotalRuntime";
+            this.lblTotalRuntime.Size = new System.Drawing.Size(13, 13);
+            this.lblTotalRuntime.TabIndex = 63;
+            this.lblTotalRuntime.Text = "0";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(214, 105);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(82, 13);
+            this.label29.TabIndex = 62;
+            this.label29.Text = "Since Last Boot";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(104, 105);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(31, 13);
+            this.label28.TabIndex = 61;
+            this.label28.Text = "Total";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(15, 121);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(53, 13);
+            this.label27.TabIndex = 60;
+            this.label27.Text = "Run Time";
             // 
             // label23
             // 
@@ -376,44 +472,12 @@
             this.label2.TabIndex = 33;
             this.label2.Text = "Processed ";
             // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.AutoSize = true;
-            this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(69, 137);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(40, 13);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Status:";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblStatus.AutoEllipsis = true;
-            this.lblStatus.ForeColor = System.Drawing.Color.White;
-            this.lblStatus.Location = new System.Drawing.Point(115, 137);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(422, 13);
-            this.lblStatus.TabIndex = 10;
-            this.lblStatus.Text = "...";
-            // 
-            // lblLicenseNumber
-            // 
-            this.lblLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblLicenseNumber.AutoSize = true;
-            this.lblLicenseNumber.Location = new System.Drawing.Point(487, 150);
-            this.lblLicenseNumber.Name = "lblLicenseNumber";
-            this.lblLicenseNumber.Size = new System.Drawing.Size(47, 13);
-            this.lblLicenseNumber.TabIndex = 11;
-            this.lblLicenseNumber.Text = "License:";
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Maroon;
-            this.ClientSize = new System.Drawing.Size(546, 185);
+            this.ClientSize = new System.Drawing.Size(546, 215);
             this.Controls.Add(this.lblLicenseNumber);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label3);
@@ -469,6 +533,12 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblLicenseNumber;
+        private System.Windows.Forms.Label lblRuntimeSinceLastBoot;
+        private System.Windows.Forms.Label lblTotalRuntime;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Timer timerSeconds;
     }
 }
 
