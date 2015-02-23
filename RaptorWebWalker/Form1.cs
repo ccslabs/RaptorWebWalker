@@ -44,18 +44,6 @@ namespace RaptorWebWalker
             else
                 LoadSettings();
 
-            frmLoginRegister loginRegister = new frmLoginRegister();
-            loginRegister.ShowDialog();
-            if (loginRegister.IsRegistering)
-            {
-                // Send Registration Command
-                SendRegistration(loginRegister.EmailAddress, loginRegister.Password);
-            }
-            else
-            {
-                SendLogin(loginRegister.EmailAddress, loginRegister.Password);
-            }
-
 
             tcpClient.Connected += tcpClient_Connected;
             tcpClient.DataReceived += tcpClient_DataReceived;
@@ -70,6 +58,22 @@ namespace RaptorWebWalker
                 Log("Retrying Connection.");
                 tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
             }
+
+            frmLoginRegister loginRegister = new frmLoginRegister();
+            loginRegister.ShowDialog();
+
+            if (loginRegister.IsRegistering)
+            {
+                // Send Registration Command
+                SendRegistration(loginRegister.EmailAddress, loginRegister.Password);
+            }
+            else
+            {
+                SendLogin(loginRegister.EmailAddress, loginRegister.Password);
+            }
+
+
+            
 
 
         }
@@ -113,13 +117,9 @@ namespace RaptorWebWalker
                 System.Threading.Thread.Sleep(5000);
                 Log("Lost Connection.");
                 tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
-
             }
+            Log("Connected.");
         }
-
-
-
-
 
         void tcpClient_errEncounter(Exception ex)
         {
@@ -130,14 +130,11 @@ namespace RaptorWebWalker
         void tcpClient_DataReceived(byte[] Data, string ID)
         {
             Log("Recieving Data from " + ID);
-
         }
 
         void tcpClient_Connected()
         {
-            Log("Connected to RaptorTCP Server");
-            // Request Login or Register
-
+            Log("Connected to RaptorTCP Server");            
         }
 
 
