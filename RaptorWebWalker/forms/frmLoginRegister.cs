@@ -43,7 +43,7 @@ namespace RaptorWebWalker.forms
                 if (btnRegister.Visible)
                 {
                     IsRegistering = false;
-                    EmailAddress = tbConfirmPassword.Text;
+                    EmailAddress = tbEmailAddress.Text;
                     Password = tbPassword.Text;
                     this.Close();
                 }
@@ -52,7 +52,7 @@ namespace RaptorWebWalker.forms
                     IsRegistering = true;
                     if (tbPassword.Text == tbConfirmPassword.Text)
                     {
-                        EmailAddress = tbConfirmPassword.Text;
+                        EmailAddress = tbEmailAddress.Text;
                         Password = tbPassword.Text;
                         this.Close();
                     }
