@@ -45,6 +45,18 @@ namespace RaptorWebWalker
             else
                 LoadSettings();
 
+            frmLoginRegister loginRegister = new frmLoginRegister();
+            loginRegister.ShowDialog();
+            if (loginRegister.IsRegistering)
+            {
+                // Send Registration Command
+                SendRegistration(loginRegister.EmailAddress, loginRegister.Password);
+            }
+            else
+            {
+                SendLogin(loginRegister.EmailAddress, loginRegister.Password);
+            }
+
 
             tcpClient.Disconnected += tcpClient_Disconnected;
             tcpClient.ReceivedFragment += tcpClient_ReceivedFragment;
@@ -64,73 +76,17 @@ namespace RaptorWebWalker
                 Application.DoEvents();
             }
 
-            frmLoginRegister loginRegister = new frmLoginRegister();
-            loginRegister.ShowDialog();
 
-            if (loginRegister.IsRegistering)
-            {
-                // Send Registration Command
-                SendRegistration(loginRegister.EmailAddress, loginRegister.Password);
             }
             else
             {
                 SendLogin(loginRegister.EmailAddress, loginRegister.Password);
             }
-        }
 
-        void tcpClient_SslValidationRequested(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
-        void tcpClient_SslError(object sender, TcpErrorEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+            
 
-        void tcpClient_ReceiveError(object sender, TcpErrorEventArgs e)
-        {
-            Log("Error Encountered: " + e.Error);          
-        }
 
-        void tcpClient_ReceivedFull(object sender, TcpReceivedEventArgs e)
-        {
-            string res = utils.GetString(e.Data);
-            string[] parts = utils.GetString(e.Data).ToLowerInvariant().Trim().Split(' ');
-
-            switch (parts[0])
-            {
-                case "login":
-                    if (parts[1] == "failed")
-                    {
-                        pictureBox1.BackColor = Color.Red;
-                    }
-                    else
-                    {
-                        pictureBox1.BackColor = Color.Green;
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            Log(res + " From: ?" );
-        }
-
-        void tcpClient_ReceivedFragment(object sender, TcpFragmentReceivedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void tcpClient_Disconnected(object sender, TcpEventArgs e)
-        {
-            while (isConnected)
-            {
-                System.Threading.Thread.Sleep(5000);
-                Log("Lost Connection.");
-                tcpClient.Connect(); //TODO: Ip Address may need to be more dynamic - shall check
-            }
-            Log("Connected.");
         }
 
         private enum ClientCommands
@@ -164,6 +120,33 @@ namespace RaptorWebWalker
 
         #endregion
 
+
+        void tcpClient_Disconnected()
+        {
+            while (!tcpClient.isConnected)
+            {
+                System.Threading.Thread.Sleep(5000);
+                Log("Lost Connection.");
+                tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+            }
+            Log("Connected.");
+        }
+
+        void tcpClient_errEncounter(Exception ex)
+        {
+            Log("Error Encountered: " + ex.Message);
+            throw new NotImplementedException();
+        }
+
+        void tcpClient_DataReceived(byte[] Data, string ID)
+        {
+            Log("Recieving Data from " + ID);
+        }
+
+        void tcpClient_Connected()
+        {
+            Log("Connected to RaptorTCP Server");            
+        }
 
         #region Logging
         private void Log(string message)
