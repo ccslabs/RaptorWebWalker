@@ -565,15 +565,20 @@ Public Class Client
         Catch ex As Exception
 
         End Try
-        While clientSocket.Connected And ConnectedHost
-            Try
-                Dim bytes(CInt(clientSocket.ReceiveBufferSize)) As Byte
-                netStream.Read(bytes, 0, CInt(clientSocket.ReceiveBufferSize))
-                DecryptBytes(bytes)
-            Catch ex As Exception
-                Exit While
-            End Try
-        End While
+        Try
+            While clientSocket.Connected And ConnectedHost
+                Try
+                    Dim bytes(CInt(clientSocket.ReceiveBufferSize)) As Byte
+                    netStream.Read(bytes, 0, CInt(clientSocket.ReceiveBufferSize))
+                    DecryptBytes(bytes)
+                Catch ex As Exception
+                    Exit While
+                End Try
+            End While
+        Catch ex As Exception
+            ' Ignore this it is always a NULL exception
+        End Try
+
         If Not Context Is Nothing Then
             Context.Post(AddressOf Disconnect, Nothing)
         Else
