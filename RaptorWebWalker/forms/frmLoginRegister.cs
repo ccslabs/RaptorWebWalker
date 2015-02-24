@@ -43,14 +43,14 @@ namespace RaptorWebWalker.forms
                 if (btnRegister.Visible)
                 {
                     IsRegistering = false;
-                    EmailAddress = tbEmailAddress.Text;
+                    EmailAddress = tbConfirmPassword.Text;
                     Password = tbPassword.Text;
                     this.Close();
                 }
                 else // This person is registering for the first time
                 {
                     IsRegistering = true;
-                    if (tbPassword.Text == tbEmailAddress.Text)
+                    if (tbPassword.Text == tbConfirmPassword.Text)
                     {
                         EmailAddress = tbConfirmPassword.Text;
                         Password = tbPassword.Text;
