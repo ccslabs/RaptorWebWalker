@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using AltarNet;
+using 
 using System.IO;
 using RaptorWebWalker.HelperClasses;
 using RaptorWebWalker.forms;
