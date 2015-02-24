@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using NetComm;
+using AltarNet;
 using System.IO;
 using RaptorWebWalker.HelperClasses;
 using RaptorWebWalker.forms;
@@ -17,7 +17,7 @@ namespace RaptorWebWalker
 {
     public partial class frmMain : Form
     {
-        NetComm.Client tcpClient = new Client();
+        AltarNet.TcpClientHandler tcpClient = new TcpClientHandler(System.Net.IPAddress.Parse("68.63.37.37"), 9119);
         Utilities utils = new Utilities();
 
         delegate void SetTextCallback(string text);
@@ -31,6 +31,7 @@ namespace RaptorWebWalker
         private double totalRunTime = 0;
         private double PreviousTotalRuntime = 0;
 
+        private bool isConnected = false;
 
         public frmMain()
         {
@@ -45,18 +46,22 @@ namespace RaptorWebWalker
                 LoadSettings();
 
 
-            tcpClient.Connected += tcpClient_Connected;
-            tcpClient.DataReceived += tcpClient_DataReceived;
-            tcpClient.errEncounter += tcpClient_errEncounter;
             tcpClient.Disconnected += tcpClient_Disconnected;
+            tcpClient.ReceivedFragment += tcpClient_ReceivedFragment;
+            tcpClient.ReceivedFull += tcpClient_ReceivedFull;
+            tcpClient.ReceiveError += tcpClient_ReceiveError;
+            tcpClient.SslError += tcpClient_SslError;
+            tcpClient.SslValidationRequested += tcpClient_SslValidationRequested;
 
             Log("Connecting...");
-            tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
-            while (!tcpClient.isConnected)
+            isConnected = tcpClient.Connect();
+            
+            while (!isConnected)
             {
                 System.Threading.Thread.Sleep(5000);
                 Log("Retrying Connection.");
-                tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+                isConnected = tcpClient.Connect();
+                Application.DoEvents();
             }
 
             frmLoginRegister loginRegister = new frmLoginRegister();
@@ -71,11 +76,61 @@ namespace RaptorWebWalker
             {
                 SendLogin(loginRegister.EmailAddress, loginRegister.Password);
             }
+        }
 
+        void tcpClient_SslValidationRequested(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
-            
+        void tcpClient_SslError(object sender, TcpErrorEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
+        void tcpClient_ReceiveError(object sender, TcpErrorEventArgs e)
+        {
+            Log("Error Encountered: " + e.Error);          
+        }
 
+        void tcpClient_ReceivedFull(object sender, TcpReceivedEventArgs e)
+        {
+            string res = utils.GetString(e.Data);
+            string[] parts = utils.GetString(e.Data).ToLowerInvariant().Trim().Split(' ');
+
+            switch (parts[0])
+            {
+                case "login":
+                    if (parts[1] == "failed")
+                    {
+                        pictureBox1.BackColor = Color.Red;
+                    }
+                    else
+                    {
+                        pictureBox1.BackColor = Color.Green;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            Log(res + " From: ?" );
+        }
+
+        void tcpClient_ReceivedFragment(object sender, TcpFragmentReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void tcpClient_Disconnected(object sender, TcpEventArgs e)
+        {
+            while (isConnected)
+            {
+                System.Threading.Thread.Sleep(5000);
+                Log("Lost Connection.");
+                tcpClient.Connect(); //TODO: Ip Address may need to be more dynamic - shall check
+            }
+            Log("Connected.");
         }
 
         private enum ClientCommands
@@ -104,38 +159,10 @@ namespace RaptorWebWalker
         private void Send(string command)
         {
             lastCommand = command.Split(' ')[0].ToString();
-            tcpClient.SendData(utils.GetBytes(command));
+            tcpClient.Send(utils.GetBytes(command));
         }
 
         #endregion
-
-
-        void tcpClient_Disconnected()
-        {
-            while (!tcpClient.isConnected)
-            {
-                System.Threading.Thread.Sleep(5000);
-                Log("Lost Connection.");
-                tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
-            }
-            Log("Connected.");
-        }
-
-        void tcpClient_errEncounter(Exception ex)
-        {
-            Log("Error Encountered: " + ex.Message);
-            throw new NotImplementedException();
-        }
-
-        void tcpClient_DataReceived(byte[] Data, string ID)
-        {
-            Log("Recieving Data from " + ID);
-        }
-
-        void tcpClient_Connected()
-        {
-            Log("Connected to RaptorTCP Server");            
-        }
 
 
         #region Logging
@@ -156,10 +183,6 @@ namespace RaptorWebWalker
                     SaveLog(formattedMessage);
                 }
             }
-
-
-
-
         }
 
         private void SaveLog(string message)
