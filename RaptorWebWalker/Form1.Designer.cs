@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.lblAuthorized = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -36,6 +37,10 @@
             this.lblStatus = new System.Windows.Forms.Label();
             this.lblLicenseNumber = new System.Windows.Forms.Label();
             this.timerSeconds = new System.Windows.Forms.Timer(this.components);
+            this.Notify = new System.Windows.Forms.NotifyIcon(this.components);
+            this.cmsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.accountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customGroupBox1 = new RaptorWebWalker.Controls.CustomGroupBox();
             this.lblRuntimeSinceLastBoot = new System.Windows.Forms.Label();
             this.lblTotalRuntime = new System.Windows.Forms.Label();
@@ -70,23 +75,24 @@
             this.lblProcessed = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.cmsMenu.SuspendLayout();
             this.customGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblAuthorized
             // 
             this.lblAuthorized.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblAuthorized.AutoSize = true;
             this.lblAuthorized.BackColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorBackColour;
             this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("BackColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorBackColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::RaptorWebWalker.Properties.Settings.Default, "AuthorisedStatus", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.lblAuthorized.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorForeColour;
-            this.lblAuthorized.Location = new System.Drawing.Point(190, 193);
+            this.lblAuthorized.Location = new System.Drawing.Point(151, 193);
             this.lblAuthorized.Name = "lblAuthorized";
-            this.lblAuthorized.Size = new System.Drawing.Size(79, 13);
+            this.lblAuthorized.Size = new System.Drawing.Size(114, 13);
             this.lblAuthorized.TabIndex = 1;
-            this.lblAuthorized.Text = global::RaptorWebWalker.Properties.Settings.Default.AuthorisedStatus;
+            this.lblAuthorized.Text = global::RaptorWebWalker.Properties.Settings.Default.IsAuthorised;
+            this.lblAuthorized.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label1
             // 
@@ -146,6 +152,34 @@
             this.timerSeconds.Enabled = true;
             this.timerSeconds.Interval = 1000;
             this.timerSeconds.Tick += new System.EventHandler(this.timerSeconds_Tick);
+            // 
+            // Notify
+            // 
+            this.Notify.ContextMenuStrip = this.cmsMenu;
+            this.Notify.Icon = ((System.Drawing.Icon)(resources.GetObject("Notify.Icon")));
+            this.Notify.Visible = true;
+            // 
+            // cmsMenu
+            // 
+            this.cmsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.accountToolStripMenuItem});
+            this.cmsMenu.Name = "cmsMenu";
+            this.cmsMenu.Size = new System.Drawing.Size(120, 26);
+            // 
+            // accountToolStripMenuItem
+            // 
+            this.accountToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loginToolStripMenuItem});
+            this.accountToolStripMenuItem.Name = "accountToolStripMenuItem";
+            this.accountToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.accountToolStripMenuItem.Text = "Account";
+            // 
+            // loginToolStripMenuItem
+            // 
+            this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
+            this.loginToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loginToolStripMenuItem.Text = "Login";
+            this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
             // 
             // customGroupBox1
             // 
@@ -483,20 +517,22 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Maroon;
             this.ClientSize = new System.Drawing.Size(546, 215);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblLicenseNumber);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.customGroupBox1);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblAuthorized);
             this.Controls.Add(this.pictureBox1);
             this.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ForeColour;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmMain";
             this.TransparencyKey = System.Drawing.Color.Maroon;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.cmsMenu.ResumeLayout(false);
             this.customGroupBox1.ResumeLayout(false);
             this.customGroupBox1.PerformLayout();
             this.ResumeLayout(false);
@@ -546,6 +582,10 @@
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Timer timerSeconds;
+        private System.Windows.Forms.NotifyIcon Notify;
+        private System.Windows.Forms.ContextMenuStrip cmsMenu;
+        private System.Windows.Forms.ToolStripMenuItem accountToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
     }
 }
 

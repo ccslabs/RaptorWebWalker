@@ -18,6 +18,8 @@ namespace RaptorWebWalker.forms
 
         public bool IsRegistering { get; set; }
 
+        public bool RememberMe { get; set; }
+
         public frmLoginRegister()
         {
             InitializeComponent();
@@ -28,7 +30,7 @@ namespace RaptorWebWalker.forms
             btnRegister.Visible = false;
             lblConfirmPassword.Visible = true;
             tbConfirmPassword.Visible = true;
-
+            btnLogin.Text = "Register";
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -45,6 +47,8 @@ namespace RaptorWebWalker.forms
                     IsRegistering = false;
                     EmailAddress = tbEmailAddress.Text;
                     Password = tbPassword.Text;
+                    RememberMe = checkBox1.Checked;
+                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
                     this.Close();
                 }
                 else // This person is registering for the first time
@@ -54,6 +58,8 @@ namespace RaptorWebWalker.forms
                     {
                         EmailAddress = tbEmailAddress.Text;
                         Password = tbPassword.Text;
+                        RememberMe = checkBox1.Checked;
+                        this.DialogResult = System.Windows.Forms.DialogResult.OK;
                         this.Close();
                     }
                     else

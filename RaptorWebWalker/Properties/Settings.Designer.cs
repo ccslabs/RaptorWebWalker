@@ -73,13 +73,61 @@ namespace RaptorWebWalker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Unauthorized   ")]
-        public string AuthorisedStatus {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsAuthorised {
             get {
-                return ((string)(this["AuthorisedStatus"]));
+                return ((bool)(this["IsAuthorised"]));
             }
             set {
-                this["AuthorisedStatus"] = value;
+                this["IsAuthorised"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Username {
+            get {
+                return ((string)(this["Username"]));
+            }
+            set {
+                this["Username"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Password {
+            get {
+                return ((string)(this["Password"]));
+            }
+            set {
+                this["Password"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClientID {
+            get {
+                return ((string)(this["ClientID"]));
+            }
+            set {
+                this["ClientID"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public long LastRunTimeDuration {
+            get {
+                return ((long)(this["LastRunTimeDuration"]));
+            }
+            set {
+                this["LastRunTimeDuration"] = value;
             }
         }
     }

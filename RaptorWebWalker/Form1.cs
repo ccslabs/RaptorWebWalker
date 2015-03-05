@@ -24,16 +24,13 @@ namespace RaptorWebWalker
         delegate void SetLabelCallBack(Label lbl, string text);
 
         private string myClientID = "";
-        private string pathSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RaptorWebWalker"); // This is the Settings Folder Path
-        private string CurrentLogFileName = "";
         private string lastCommand = "";
 
-        private double SecondsPastSinceBoot = 0;
-        private double totalRunTime = 0;
-        private double PreviousTotalRuntime = 0;
+        private long SecondsPastSinceBoot = 0;
+        private long totalRunTime = 0;
 
-        private bool IsAuthorised = false;
 
+        private bool ClosingDown = false;
 
         public frmMain()
         {
@@ -52,6 +49,7 @@ namespace RaptorWebWalker
             tcpClient.DataReceived += tcpClient_DataReceived;
             tcpClient.errEncounter += tcpClient_errEncounter;
             tcpClient.Disconnected += tcpClient_Disconnected;
+            tcpClient.NoDelay = true;
 
             Log("Connecting...");
             tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
@@ -62,41 +60,16 @@ namespace RaptorWebWalker
                 tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
             }
 
-            LoginToRaptorTCP();
-
-
-
 
 
         }
 
-        private void LoginToRaptorTCP()
-        {
-            if (!IsAuthorised)
-            {
-                frmLoginRegister loginRegister = new frmLoginRegister();
-                loginRegister.ShowDialog();
 
-                if (loginRegister.IsRegistering)
-                {
-                    // Send Registration Command
-                    SendRegistration(loginRegister.EmailAddress, loginRegister.Password);
-                }
-                else
-                {
-                    SendLogin(loginRegister.EmailAddress, loginRegister.Password);
-                }
-            }
-            else
-            {
-                Log("You are Already Logged In");
-            }
-        }
 
         private enum ClientCommands
         {
             Login,
-            Register
+            Register,
         }
 
 
@@ -105,13 +78,13 @@ namespace RaptorWebWalker
 
 
         private void SendLogin(string EmailAddress, string Password)
-        {            
+        {
             string command = ClientCommands.Login + " " + EmailAddress + " " + utils.HashPassword(Password);
             Send(command);
         }
 
         private void SendRegistration(string EmailAddress, string Password)
-        {            
+        {
             string command = ClientCommands.Register + " " + EmailAddress + " " + utils.HashPassword(Password);
             Send(command);
         }
@@ -127,15 +100,19 @@ namespace RaptorWebWalker
 
         void tcpClient_Disconnected()
         {
-            while (!tcpClient.isConnected)
+            if (!ClosingDown)
             {
-                System.Threading.Thread.Sleep(5000);
-                Log("Lost Connection.");
-                tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+                while (!tcpClient.isConnected)
+                {
+                    Application.DoEvents();
+                    System.Threading.Thread.Sleep(500);
+                    Log("Lost Connection.");
+                    tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+                }
+                Log("Connected.");
+                //if (!IsAuthorised)
+                //    LoginToRaptorTCP();
             }
-            Log("Connected.");
-            if (!IsAuthorised)
-                LoginToRaptorTCP();
         }
 
         void tcpClient_errEncounter(Exception ex)
@@ -148,6 +125,9 @@ namespace RaptorWebWalker
         {
             Successful,
             Failed,
+            UseCache,
+            Wait,
+            Resume,
         }
 
         void tcpClient_DataReceived(byte[] Data, string ID)
@@ -173,15 +153,9 @@ namespace RaptorWebWalker
                         case ClientCommands.Login:
                             switch (valueReceived)
                             {
-                                case ServerCommands.Successful:
-                                    // Successfully Logged in.
-                                    IsAuthorised = true;
-                                    break;
-                                case ServerCommands.Failed:
-                                    // Failed to Log in - but why? Assume requires registration for now
-                                    //TODO: Check if email is registered
-                                    IsAuthorised = false;
+                                case ServerCommands.Failed:                                    
                                     SetLabel(lblAuthorized, "Unauthorised");
+                                    Properties.Settings.Default.IsAuthorised = false;
                                     break;
                                 default:
                                     break;
@@ -190,16 +164,14 @@ namespace RaptorWebWalker
                         case ClientCommands.Register:
                             switch (valueReceived)
                             {
-                                case ServerCommands.Successful:
-                                    // Successfully Registered and Logged In.
-                                    SetLabel(lblAuthorized, "Authorised");
-                                    IsAuthorised = true;
-                                    break;
-                                case ServerCommands.Failed:
-                                    // Failed to Register - but why? Assume email already registered for now
-                                    //TODO: Check if email is already registered.
-                                    IsAuthorised = false;
+                                case ServerCommands.Failed:                                    
                                     SetLabel(lblAuthorized, "Unauthorised");
+                                    Properties.Settings.Default.IsAuthorised = false;
+                                    if (!string.IsNullOrEmpty(Properties.Settings.Default.Password) && !string.IsNullOrEmpty(Properties.Settings.Default.Username))
+                                    {
+                                        SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
+                                    }
+
                                     break;
                                 default:
                                     break;
@@ -213,7 +185,43 @@ namespace RaptorWebWalker
                 }
                 else if (parts.Count() == 3)
                 {
+                    // Received information about the command we sent - what happened?                    
+                    ClientCommands commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
+                    ServerCommands valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
+                    string response = parts[2].ToString();
+                    switch (commandSent)
+                    {
+                        case ClientCommands.Login:
+                            switch (valueReceived)
+                            {
+                                case ServerCommands.Successful:
+                                    // Successfully Logged in.
+                                    SetLabel(lblAuthorized, "Authorised");
+                                    SetLabel(lblLicenseNumber, "License: " + response);
+                                    Properties.Settings.Default.IsAuthorised = true;
+                                    break;
 
+                                default:
+                                    break;
+                            }
+                            break;
+                        case ClientCommands.Register:
+                            switch (valueReceived)
+                            {
+                                case ServerCommands.Successful:
+                                    // Successfully Registered and Logged In.
+                                    SetLabel(lblAuthorized, "Authorised");
+                                    SetLabel(lblLicenseNumber, "License: " + response);
+                                    Properties.Settings.Default.IsAuthorised = true;
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 else
                 {
@@ -228,7 +236,8 @@ namespace RaptorWebWalker
 
         }
 
-       
+
+
 
         void tcpClient_Connected()
         {
@@ -247,22 +256,20 @@ namespace RaptorWebWalker
             }
             else
             {
-                if(lbl == lblAuthorized) // Update the User's Authroisation Status
+                if (lbl == lblAuthorized) // Update the User's Authroisation Status
                 {
-                    Properties.Settings.Default.AuthorisedStatus = message;
+                    Properties.Settings.Default.IsAuthorised = true;
 
                     if (lbl.Text == "Unauthorised")
                     {
-                        IsAuthorised = false;
                         lbl.ForeColor = Properties.Settings.Default.ErrorForeColour;
                         lbl.BackColor = Properties.Settings.Default.ErrorBackColour;
                     }
                     else
                     {
-                        IsAuthorised = true;
                         lbl.ForeColor = Properties.Settings.Default.ForeColour;
                     }
-                }                
+                }
                 lbl.Text = message;
             }
         }
@@ -281,108 +288,20 @@ namespace RaptorWebWalker
                 if (message.ToLowerInvariant().StartsWith("error"))
                 {
                     string formattedMessage = DateTime.Now + "\t" + message;
-                    SaveLog(formattedMessage);
                 }
             }
         }
 
-        private void SaveLog(string message)
-        {
-            FileStream fs = null;
-            StreamWriter sw = null;
-            string LogFileName = GetLogFileName();
-
-            try
-            {
-                fs = new FileStream(Path.Combine(pathSettings, LogFileName), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
-                sw = new StreamWriter(fs);
-
-                sw.WriteLine(message);
-
-                sw.Close();
-                fs.Close();
-            }
-            catch (Exception)
-            {
-                if (sw != null) sw.Close();
-                if (fs != null) fs.Close();
-                throw;
-            }
-        }
-
-        private string GetLogFileName()
-        {
-            DateTime dt = DateTime.Now;
-            if (CurrentLogFileName.Contains(dt.DayOfWeek.ToString() + dt.Month.ToString() + dt.Year.ToString() + ".rww"))
-                return CurrentLogFileName;
-            else
-            {
-                CurrentLogFileName = dt.DayOfWeek.ToString() + dt.Month.ToString() + dt.Year.ToString() + ".rww";
-                return CurrentLogFileName;
-            }
-        }
-        #endregion
-
-        #region Save and Load Settings
-
-        private void LoadSettings()
-        {
-            FileStream fs = null;
-            StreamReader sr = null;
-
-            try
-            {
-                fs = new FileStream(Path.Combine(pathSettings, "settings.rww"), FileMode.Open, FileAccess.Read, FileShare.None);
-                sr = new StreamReader(fs);
-
-                myClientID = sr.ReadLine();
-                if (!Double.TryParse(sr.ReadLine(), out PreviousTotalRuntime))
-                    PreviousTotalRuntime = 0;
 
 
-                sr.Close();
-                fs.Close();
-            }
-            catch (Exception)
-            {
-                if (sr != null) sr.Close();
-                if (fs != null) fs.Close();
-                throw;
-            }
-        }
-        private void SaveSettings()
-        {
-            Properties.Settings.Default.Save();
-
-            FileStream fs = null;
-            StreamWriter sw = null;
-
-            try
-            {
-                fs = new FileStream(Path.Combine(pathSettings, "settings.rww"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
-                sw = new StreamWriter(fs);
-
-                sw.WriteLine(myClientID);
-                sw.WriteLine(totalRunTime);
-
-                sw.Close();
-                fs.Close();
-            }
-            catch (Exception)
-            {
-                if (sw != null) sw.Close();
-                if (fs != null) fs.Close();
-                throw;
-            }
-        }
 
         #endregion
+
 
         #region First Run Operations
 
         private void SetupClient()
         {
-            Directory.CreateDirectory(pathSettings); // We know it does not exist we just checked!
             myClientID = CreateClientID(); // Create a Unique ID for this client
             SaveSettings();
         }
@@ -394,25 +313,70 @@ namespace RaptorWebWalker
 
         private bool FirstRun()
         {
-            // If the settings folder is missing then we need to Set the Client up
-            return !Directory.Exists(pathSettings); // If the folder exists return FALSE - THIS IS NOT the first run!           
+            if (string.IsNullOrEmpty(Properties.Settings.Default.ClientID))
+                return true;
+            return false;
         }
 
         #endregion
 
+
+        private void SaveSettings()
+        {            
+            Properties.Settings.Default.ClientID = myClientID;
+            Properties.Settings.Default.LastRunTimeDuration = totalRunTime;
+            Properties.Settings.Default.Save();
+        }
+
+        private void LoadSettings()
+        {
+            myClientID = Properties.Settings.Default.ClientID;
+            totalRunTime = Properties.Settings.Default.LastRunTimeDuration;
+        }
+
         private void timerSeconds_Tick(object sender, EventArgs e)
         {
             SecondsPastSinceBoot++;
-            totalRunTime = SecondsPastSinceBoot + PreviousTotalRuntime;
+            totalRunTime = SecondsPastSinceBoot + Properties.Settings.Default.LastRunTimeDuration;
             lblRuntimeSinceLastBoot.Text = utils.SecondsToDHMS(SecondsPastSinceBoot);
             lblTotalRuntime.Text = utils.SecondsToDHMS(totalRunTime);
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Properties.Settings.Default.IsAuthorised = false;
+            ClosingDown = true;
             tcpClient.Disconnect();
             SaveSettings();
         }
+
+        #region CMS Menu
+        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmLoginRegister login = new frmLoginRegister();
+            DialogResult dr = login.ShowDialog();
+
+            if (dr != System.Windows.Forms.DialogResult.Cancel)
+            {
+                if (login.RememberMe)
+                {
+                    Properties.Settings.Default.Password = login.Password;
+                    Properties.Settings.Default.Username = login.EmailAddress;
+                }
+
+                if (login.IsRegistering)
+                {
+                    SendRegistration(login.EmailAddress, login.Password);
+                }
+                else
+                {
+                    SendLogin(login.EmailAddress, login.Password);
+                }
+            }
+        }
+        #endregion
+
+
 
     }
 }
