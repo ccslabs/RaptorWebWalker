@@ -77,11 +77,16 @@
             // 
             this.lblAuthorized.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblAuthorized.AutoSize = true;
+            this.lblAuthorized.BackColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorBackColour;
+            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("BackColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorBackColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::RaptorWebWalker.Properties.Settings.Default, "AuthorisedStatus", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lblAuthorized.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorForeColour;
             this.lblAuthorized.Location = new System.Drawing.Point(190, 193);
             this.lblAuthorized.Name = "lblAuthorized";
             this.lblAuthorized.Size = new System.Drawing.Size(79, 13);
             this.lblAuthorized.TabIndex = 1;
-            this.lblAuthorized.Text = "Unauthorized   ";
+            this.lblAuthorized.Text = global::RaptorWebWalker.Properties.Settings.Default.AuthorisedStatus;
             // 
             // label1
             // 
@@ -485,7 +490,8 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblAuthorized);
             this.Controls.Add(this.pictureBox1);
-            this.ForeColor = System.Drawing.Color.White;
+            this.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ForeColour;
             this.Name = "frmMain";
             this.TransparencyKey = System.Drawing.Color.Maroon;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
