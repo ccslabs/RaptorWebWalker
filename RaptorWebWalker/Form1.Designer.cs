@@ -41,6 +41,8 @@
             this.cmsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.accountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timerConnectionCheck = new System.Windows.Forms.Timer(this.components);
+            this.lblLastCommand = new System.Windows.Forms.Label();
             this.customGroupBox1 = new RaptorWebWalker.Controls.CustomGroupBox();
             this.lblRuntimeSinceLastBoot = new System.Windows.Forms.Label();
             this.lblTotalRuntime = new System.Windows.Forms.Label();
@@ -74,6 +76,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.lblProcessed = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.rtbConOut = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.cmsMenu.SuspendLayout();
             this.customGroupBox1.SuspendLayout();
@@ -83,22 +86,21 @@
             // 
             this.lblAuthorized.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblAuthorized.BackColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorBackColour;
-            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("BackColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorBackColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::RaptorWebWalker.Properties.Settings.Default, "AuthorisedStatus", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lblAuthorized.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ErrorForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.lblAuthorized.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ErrorForeColour;
-            this.lblAuthorized.Location = new System.Drawing.Point(151, 193);
+            this.lblAuthorized.Location = new System.Drawing.Point(151, 254);
             this.lblAuthorized.Name = "lblAuthorized";
             this.lblAuthorized.Size = new System.Drawing.Size(114, 13);
             this.lblAuthorized.TabIndex = 1;
-            this.lblAuthorized.Text = global::RaptorWebWalker.Properties.Settings.Default.IsAuthorised;
+            this.lblAuthorized.Text = "Unauthorised";
             this.lblAuthorized.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(262, 193);
+            this.label1.Location = new System.Drawing.Point(262, 254);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(275, 13);
             this.label1.TabIndex = 2;
@@ -140,7 +142,7 @@
             // lblLicenseNumber
             // 
             this.lblLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblLicenseNumber.Location = new System.Drawing.Point(193, 180);
+            this.lblLicenseNumber.Location = new System.Drawing.Point(193, 241);
             this.lblLicenseNumber.Name = "lblLicenseNumber";
             this.lblLicenseNumber.Size = new System.Drawing.Size(341, 13);
             this.lblLicenseNumber.TabIndex = 11;
@@ -177,9 +179,25 @@
             // loginToolStripMenuItem
             // 
             this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
-            this.loginToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loginToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.loginToolStripMenuItem.Text = "Login";
             this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
+            // 
+            // timerConnectionCheck
+            // 
+            this.timerConnectionCheck.Interval = 60000;
+            this.timerConnectionCheck.Tick += new System.EventHandler(this.timerConnectionCheck_Tick);
+            // 
+            // lblLastCommand
+            // 
+            this.lblLastCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblLastCommand.AutoEllipsis = true;
+            this.lblLastCommand.ForeColor = System.Drawing.Color.White;
+            this.lblLastCommand.Location = new System.Drawing.Point(115, 180);
+            this.lblLastCommand.Name = "lblLastCommand";
+            this.lblLastCommand.Size = new System.Drawing.Size(422, 13);
+            this.lblLastCommand.TabIndex = 12;
+            this.lblLastCommand.Text = "...";
             // 
             // customGroupBox1
             // 
@@ -511,12 +529,34 @@
             this.label2.TabIndex = 33;
             this.label2.Text = "Processed ";
             // 
+            // rtbConOut
+            // 
+            this.rtbConOut.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.rtbConOut.BackColor = System.Drawing.Color.Maroon;
+            this.rtbConOut.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtbConOut.DataBindings.Add(new System.Windows.Forms.Binding("ForeColor", global::RaptorWebWalker.Properties.Settings.Default, "ForeColour", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.rtbConOut.DetectUrls = false;
+            this.rtbConOut.Font = new System.Drawing.Font("Lucida Sans Unicode", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rtbConOut.ForeColor = global::RaptorWebWalker.Properties.Settings.Default.ForeColour;
+            this.rtbConOut.Location = new System.Drawing.Point(72, 197);
+            this.rtbConOut.Name = "rtbConOut";
+            this.rtbConOut.ReadOnly = true;
+            this.rtbConOut.ShortcutsEnabled = false;
+            this.rtbConOut.ShowSelectionMargin = true;
+            this.rtbConOut.Size = new System.Drawing.Size(465, 41);
+            this.rtbConOut.TabIndex = 13;
+            this.rtbConOut.Text = "";
+            this.rtbConOut.WordWrap = false;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Maroon;
-            this.ClientSize = new System.Drawing.Size(546, 215);
+            this.ClientSize = new System.Drawing.Size(546, 276);
+            this.Controls.Add(this.rtbConOut);
+            this.Controls.Add(this.lblLastCommand);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblLicenseNumber);
             this.Controls.Add(this.lblStatus);
@@ -586,6 +626,9 @@
         private System.Windows.Forms.ContextMenuStrip cmsMenu;
         private System.Windows.Forms.ToolStripMenuItem accountToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
+        private System.Windows.Forms.Timer timerConnectionCheck;
+        private System.Windows.Forms.Label lblLastCommand;
+        private System.Windows.Forms.RichTextBox rtbConOut;
     }
 }
 

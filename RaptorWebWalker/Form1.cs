@@ -12,6 +12,7 @@ using NetComm;
 using System.IO;
 using RaptorWebWalker.HelperClasses;
 using RaptorWebWalker.forms;
+using System.Collections;
 
 namespace RaptorWebWalker
 {
@@ -29,8 +30,10 @@ namespace RaptorWebWalker
         private long SecondsPastSinceBoot = 0;
         private long totalRunTime = 0;
 
+        private ArrayList alUrls = new ArrayList();
 
         private bool ClosingDown = false;
+        private bool Waiting = true;
 
         public frmMain()
         {
@@ -43,7 +46,6 @@ namespace RaptorWebWalker
                 SetupClient();
             else
                 LoadSettings();
-
 
             tcpClient.Connected += tcpClient_Connected;
             tcpClient.DataReceived += tcpClient_DataReceived;
@@ -59,9 +61,10 @@ namespace RaptorWebWalker
                 Log("Retrying Connection.");
                 tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
             }
-
-
-
+            if(Properties.Settings.Default.RememberMe) // Auto login if RememberMe is true
+            {
+                SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
+            }
         }
 
 
@@ -70,6 +73,8 @@ namespace RaptorWebWalker
         {
             Login,
             Register,
+            Get,
+            NOP,
         }
 
 
@@ -93,6 +98,7 @@ namespace RaptorWebWalker
         {
             lastCommand = command.Split(' ')[0].ToString();
             tcpClient.SendData(utils.GetBytes(command));
+            lblLastCommand.Text = lastCommand;            
         }
 
         #endregion
@@ -102,14 +108,15 @@ namespace RaptorWebWalker
         {
             if (!ClosingDown)
             {
-                while (!tcpClient.isConnected)
+                if (!tcpClient.isConnected)
+                    timerConnectionCheck.Enabled = true;
+                else
                 {
-                    Application.DoEvents();
-                    System.Threading.Thread.Sleep(500);
-                    Log("Lost Connection.");
-                    tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+                    timerConnectionCheck.Enabled = false;
+                    Log("Connected.");
+                    SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
+                    Log("Re-Logging In");
                 }
-                Log("Connected.");
                 //if (!IsAuthorised)
                 //    LoginToRaptorTCP();
             }
@@ -128,6 +135,8 @@ namespace RaptorWebWalker
             UseCache,
             Wait,
             Resume,
+            SendEmailAddress,
+            SetMessageSize,
         }
 
         void tcpClient_DataReceived(byte[] Data, string ID)
@@ -140,20 +149,71 @@ namespace RaptorWebWalker
 
                 if (parts.Count() == 1)
                 {
-
+                    ServerCommands commandReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[0].ToString());
+                    switch (commandReceived)
+                    {
+                        case ServerCommands.Successful:
+                            break;
+                        case ServerCommands.Failed:
+                            break;
+                        case ServerCommands.UseCache:
+                            Waiting = true;
+                            break;
+                        case ServerCommands.Wait:
+                            Waiting = true;
+                            break;
+                        case ServerCommands.Resume:
+                            Waiting = false;
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 else if (parts.Count() == 2)
                 {
-                    // Received information about the command we sent - what happened?                    
-                    ClientCommands commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
-                    ServerCommands valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
+                    // Received information about the command we sent - what happened?  
+                    ServerCommands valueReceived;
+                    ClientCommands commandSent;
+
+                    try
+                    {
+                        commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
+                        valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
+                    }
+                    catch (Exception)
+                    {
+                        // We do not always receive an answer to a question - sometimes the server sends a command without it being a reply to us
+                        valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[0].ToString());
+                        commandSent = ClientCommands.NOP;
+                    }
+
+
+                    switch (valueReceived)
+                    {
+                        case ServerCommands.Successful:
+                            break;
+                        case ServerCommands.Failed:
+                            break;
+                        case ServerCommands.UseCache:
+                            break;
+                        case ServerCommands.Wait:
+                            break;
+                        case ServerCommands.Resume:
+                            break;
+                        case ServerCommands.SetMessageSize:
+                            Log("Increasing Message size to: " + parts[1].ToString());
+                            tcpClient.ReceiveBufferSize = int.Parse(parts[1]);
+                            break;
+                        default:
+                            break;
+                    }
 
                     switch (commandSent)
                     {
                         case ClientCommands.Login:
                             switch (valueReceived)
                             {
-                                case ServerCommands.Failed:                                    
+                                case ServerCommands.Failed:
                                     SetLabel(lblAuthorized, "Unauthorised");
                                     Properties.Settings.Default.IsAuthorised = false;
                                     break;
@@ -164,19 +224,19 @@ namespace RaptorWebWalker
                         case ClientCommands.Register:
                             switch (valueReceived)
                             {
-                                case ServerCommands.Failed:                                    
+                                case ServerCommands.Failed:
                                     SetLabel(lblAuthorized, "Unauthorised");
                                     Properties.Settings.Default.IsAuthorised = false;
                                     if (!string.IsNullOrEmpty(Properties.Settings.Default.Password) && !string.IsNullOrEmpty(Properties.Settings.Default.Username))
                                     {
                                         SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
                                     }
-
                                     break;
                                 default:
                                     break;
                             }
                             break;
+
                         default:
                             break;
                     }
@@ -199,6 +259,7 @@ namespace RaptorWebWalker
                                     SetLabel(lblAuthorized, "Authorised");
                                     SetLabel(lblLicenseNumber, "License: " + response);
                                     Properties.Settings.Default.IsAuthorised = true;
+                                    Send(ClientCommands.Get.ToString());
                                     break;
 
                                 default:
@@ -213,6 +274,7 @@ namespace RaptorWebWalker
                                     SetLabel(lblAuthorized, "Authorised");
                                     SetLabel(lblLicenseNumber, "License: " + response);
                                     Properties.Settings.Default.IsAuthorised = true;
+                                    Send(ClientCommands.Get.ToString());
                                     break;
 
                                 default:
@@ -222,6 +284,40 @@ namespace RaptorWebWalker
                         default:
                             break;
                     }
+                }
+                else if (parts.Count() > 10)
+                {
+                    ClientCommands commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
+                    ServerCommands valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
+                    string response = parts[2].ToString();
+                    switch (valueReceived)
+                    {
+                        case ServerCommands.Successful:
+                            switch (commandSent)
+                            {
+                                case ClientCommands.Get:
+                                    {
+                                        for (int idx = 2; idx < 12; idx++)
+                                        {
+                                            string url = parts[idx].ToString();
+                                            if(!string.IsNullOrEmpty(url))
+                                            {
+                                                alUrls.Add(url);
+                                            }
+                                        }
+                                        break;
+                                    }
+                            }
+                            if (alUrls.Count > 0)
+                                ProcessUrls();
+                            break;
+                        case ServerCommands.Failed:
+                            break;
+
+                        default:
+                            break;
+                    }
+
                 }
                 else
                 {
@@ -236,11 +332,15 @@ namespace RaptorWebWalker
 
         }
 
-
+        private void ProcessUrls()
+        {
+            throw new NotImplementedException();
+        }
 
 
         void tcpClient_Connected()
         {
+            timerConnectionCheck.Enabled = false;
             Log("Connected to RaptorTCP Server");
         }
 
@@ -258,16 +358,16 @@ namespace RaptorWebWalker
             {
                 if (lbl == lblAuthorized) // Update the User's Authroisation Status
                 {
-                    Properties.Settings.Default.IsAuthorised = true;
-
-                    if (lbl.Text == "Unauthorised")
+                    if (message == "Authorised")
                     {
-                        lbl.ForeColor = Properties.Settings.Default.ErrorForeColour;
-                        lbl.BackColor = Properties.Settings.Default.ErrorBackColour;
+                        lbl.ForeColor = Properties.Settings.Default.ForeColour;
+                        Properties.Settings.Default.IsAuthorised = true;
                     }
                     else
                     {
-                        lbl.ForeColor = Properties.Settings.Default.ForeColour;
+                        lbl.ForeColor = Properties.Settings.Default.ErrorForeColour;
+                        lbl.BackColor = Properties.Settings.Default.ErrorBackColour;
+                        Properties.Settings.Default.IsAuthorised = false;
                     }
                 }
                 lbl.Text = message;
@@ -276,7 +376,6 @@ namespace RaptorWebWalker
 
         private void Log(string message)
         {
-
             if (this.lblStatus.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(Log);
@@ -285,10 +384,21 @@ namespace RaptorWebWalker
             else
             {
                 lblStatus.Text = message;
-                if (message.ToLowerInvariant().StartsWith("error"))
-                {
-                    string formattedMessage = DateTime.Now + "\t" + message;
-                }
+                LogToConOut(message);
+            }
+        }
+
+        private void LogToConOut(string message)
+        {
+            if (this.rtbConOut.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(LogToConOut);
+                this.Invoke(d, new object[] { message });
+            }
+            else
+            {
+                rtbConOut.AppendText(DateTime.Now + "\t" + message + Environment.NewLine);
+                rtbConOut.Focus();
             }
         }
 
@@ -322,7 +432,7 @@ namespace RaptorWebWalker
 
 
         private void SaveSettings()
-        {            
+        {
             Properties.Settings.Default.ClientID = myClientID;
             Properties.Settings.Default.LastRunTimeDuration = totalRunTime;
             Properties.Settings.Default.Save();
@@ -358,12 +468,14 @@ namespace RaptorWebWalker
 
             if (dr != System.Windows.Forms.DialogResult.Cancel)
             {
+                Properties.Settings.Default.RememberMe = login.RememberMe;
+
                 if (login.RememberMe)
                 {
                     Properties.Settings.Default.Password = login.Password;
-                    Properties.Settings.Default.Username = login.EmailAddress;
+                    Properties.Settings.Default.Username = login.EmailAddress;                   
                 }
-
+                
                 if (login.IsRegistering)
                 {
                     SendRegistration(login.EmailAddress, login.Password);
@@ -375,6 +487,12 @@ namespace RaptorWebWalker
             }
         }
         #endregion
+
+        private void timerConnectionCheck_Tick(object sender, EventArgs e)
+        {
+            Log("Retrying Connection");
+            tcpClient.Connect("168.63.37.37", 9119, myClientID); //TODO: Ip Address may need to be more dynamic - shall check
+        }
 
 
 
