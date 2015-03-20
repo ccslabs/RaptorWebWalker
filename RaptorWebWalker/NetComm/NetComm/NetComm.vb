@@ -561,29 +561,35 @@ Public Class Client
                 'Sending ends
                 ConnectedHost = True
                 EventRaise(EventPointer.Connected)
+            Else
+
             End If
         Catch ex As Exception
+            'DG
+            ConnectedHost = False
+            Dim s = ex.Message
 
         End Try
-        Try
-            While clientSocket.Connected And ConnectedHost
-                Try
-                    Dim bytes(CInt(clientSocket.ReceiveBufferSize)) As Byte
-                    netStream.Read(bytes, 0, CInt(clientSocket.ReceiveBufferSize))
-                    DecryptBytes(bytes)
-                Catch ex As Exception
-                    Exit While
-                End Try
-            End While
-        Catch ex As Exception
-            ' Ignore this it is always a NULL exception
-        End Try
+        'Try
+        '    While clientSocket.Connected And ConnectedHost
+        '        Try
+        '            Dim bytes(CInt(clientSocket.ReceiveBufferSize)) As Byte
+        '            netStream.Read(bytes, 0, CInt(clientSocket.ReceiveBufferSize))
+        '            DecryptBytes(bytes)
+        '        Catch ex As Exception
+        '            Exit While
+        '        End Try
+        '    End While
+        'Catch
+        '    'DG: Always a null reference exception.
+        'End Try
 
-        If Not Context Is Nothing Then
-            Context.Post(AddressOf Disconnect, Nothing)
-        Else
-            Disconnect()
-        End If
+
+        'If Not Context Is Nothing Then
+        '    Context.Post(AddressOf Disconnect, Nothing)
+        'Else
+        '    Disconnect()
+        'End If
     End Sub
     Private Sub DecryptBytes(ByVal Message() As Byte)
         Dim Disconnected As Boolean = True
@@ -610,7 +616,13 @@ Public Class Client
         Dim NDelay As Boolean = clientSocket.NoDelay
         If Not clientSocket Is Nothing Then clientSocket.Close()
         clientSocket = New TcpClient()
+        If SBufferSize = 0 Then
+            SBufferSize = 4096           
+        End If
         clientSocket.SendBufferSize = SBufferSize
+        If RBufferSize = 0 Then
+            RBufferSize = 4096
+        End If
         clientSocket.ReceiveBufferSize = RBufferSize
         clientSocket.NoDelay = NDelay
         RaiseEvent Disconnected()

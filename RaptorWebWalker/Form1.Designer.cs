@@ -41,7 +41,6 @@
             this.cmsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.accountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timerConnectionCheck = new System.Windows.Forms.Timer(this.components);
             this.lblLastCommand = new System.Windows.Forms.Label();
             this.rtbConOut = new System.Windows.Forms.RichTextBox();
             this.customGroupBox1 = new RaptorWebWalker.Controls.CustomGroupBox();
@@ -182,11 +181,6 @@
             this.loginToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.loginToolStripMenuItem.Text = "Login";
             this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
-            // 
-            // timerConnectionCheck
-            // 
-            this.timerConnectionCheck.Interval = 10000;
-            this.timerConnectionCheck.Tick += new System.EventHandler(this.timerConnectionCheck_Tick);
             // 
             // lblLastCommand
             // 
@@ -627,7 +621,6 @@
         private System.Windows.Forms.ContextMenuStrip cmsMenu;
         private System.Windows.Forms.ToolStripMenuItem accountToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
-        private System.Windows.Forms.Timer timerConnectionCheck;
         private System.Windows.Forms.Label lblLastCommand;
         private System.Windows.Forms.RichTextBox rtbConOut;
     }
