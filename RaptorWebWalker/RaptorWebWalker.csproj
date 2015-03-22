@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Cache\Cache.cs" />
+    <Compile Include="Classes\TcpServer\TcpServer.cs" />
     <Compile Include="Controls\CustomGroupBox.cs">
       <SubType>Component</SubType>
     </Compile>

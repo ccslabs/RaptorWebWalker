@@ -21,6 +21,8 @@ namespace RaptorWebWalker
     public partial class frmMain : Form
     {
         RaptorWebWalker.Classes.Cache.Cache Cache = new Classes.Cache.Cache();
+        RaptorWebWalker.Classes.TcpServer.TcpServer tcpServer = new Classes.TcpServer.TcpServer();
+
         Utilities utils = new Utilities();
         
         delegate void SetTextCallback(string text);
@@ -71,7 +73,7 @@ namespace RaptorWebWalker
         {
             Log("Starting...");
             
-            if(IstcpServerOnline())
+            if(tcpServer.IstcpServerOnline())
             {
                 if(Cache.IsCacheInUse())
                 {
@@ -99,11 +101,7 @@ namespace RaptorWebWalker
 
         
 
-        private bool IstcpServerOnline()
-        {
-            // Send Hello and see if we get a response.
-            return false;
-        }
+        
 
 
 
