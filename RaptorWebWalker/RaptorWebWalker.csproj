@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -102,9 +103,12 @@
     <None Include="Resources\hand-print-blue.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="NetComm\NetComm\NetComm.vbproj">
-      <Project>{c59ceb78-9a49-4222-86a0-5ad229212ef3}</Project>
-      <Name>NetComm</Name>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ITCPRemotingService\ITCPRemotingService.csproj">
+      <Project>{820aa0d1-8e66-4a3c-a0f5-cf68ca051471}</Project>
+      <Name>ITCPRemotingService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

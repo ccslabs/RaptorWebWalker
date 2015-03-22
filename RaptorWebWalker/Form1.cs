@@ -13,6 +13,8 @@ using RaptorWebWalker.HelperClasses;
 using RaptorWebWalker.forms;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 
 namespace RaptorWebWalker
 {
@@ -71,7 +73,7 @@ namespace RaptorWebWalker
             
             if(IstcpServerOnline())
             {
-                if(IsCacheInUse())
+                if(Cache.IsCacheInUse())
                 {
                     Cache.ProcessCache();
                 }
@@ -82,7 +84,7 @@ namespace RaptorWebWalker
             }
             else
             {
-                if(IsCacheInUse())
+                if(Cache.IsCacheInUse())
                 {
                     Cache.ProcessCache();
                 }
@@ -95,15 +97,12 @@ namespace RaptorWebWalker
 
         
 
-        private bool IsCacheInUse()
-        {
-            throw new NotImplementedException();
-        }
+        
 
         private bool IstcpServerOnline()
         {
             // Send Hello and see if we get a response.
-
+            return false;
         }
 
 

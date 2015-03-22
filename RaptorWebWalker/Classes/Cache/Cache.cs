@@ -13,5 +13,9 @@ namespace RaptorWebWalker.Classes.Cache
             throw new NotImplementedException();
         }
 
+        internal bool IsCacheInUse()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
