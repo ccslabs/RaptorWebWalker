@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using NetComm;
 using System.IO;
 using RaptorWebWalker.HelperClasses;
 using RaptorWebWalker.forms;
@@ -19,7 +18,7 @@ namespace RaptorWebWalker
 {
     public partial class frmMain : Form
     {
-        NetComm.Client tcpClient = new Client();
+
         Utilities utils = new Utilities();
         System.Timers.Timer timerCheckTCPConnection = new System.Timers.Timer();
 
@@ -34,12 +33,8 @@ namespace RaptorWebWalker
         private long totalRunTime = 0;
 
         private int ThirtySeconds = 0;
-        private int LoginRegisterFailedCounter = 0; // When this get's to three - pop-up the login registration form as the automatic system is failing.
-        
-        private ObservableCollection<string> alUrls = new ObservableCollection<string>();
 
-        private bool ClosingDown = false;
-        private bool Waiting = true;
+        private ObservableCollection<string> alUrls = new ObservableCollection<string>();
 
         public frmMain()
         {
@@ -53,11 +48,7 @@ namespace RaptorWebWalker
             else
                 LoadSettings();
 
-            tcpClient.Connected += tcpClient_Connected;
-          //  tcpClient.DataReceived += tcpClient_DataReceived;
-            //tcpClient.errEncounter += tcpClient_errEncounter;
-            tcpClient.Disconnected += tcpClient_Disconnected;
-            tcpClient.NoDelay = true;
+
             alUrls.CollectionChanged += alUrls_CollectionChanged;
             Task.Run(() => Startup());
         }
@@ -67,9 +58,9 @@ namespace RaptorWebWalker
             switch (e.Action)
             {
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                  //  ProcessUrls();
+                    //  ProcessUrls();
                     break;
-                
+
                 default:
                     break;
             }
@@ -77,53 +68,7 @@ namespace RaptorWebWalker
 
         private void Startup()
         {
-            ConnectToTCPServer();
-            
-            if (tcpClient.isConnected && Properties.Settings.Default.RememberMe) // Auto login if RememberMe is true
-            {                
-                SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
-            }
-            else
-            {
-                // Retry Connection Once every so often
-                CheckTCPConnection();
-                // Is there a cache to use?
-            }
-        }
 
-        private void CheckTCPConnection()
-        {
-            Log("Starting timerTCPConnectionCheck");
-            timerCheckTCPConnection.AutoReset = true;
-            timerCheckTCPConnection.Elapsed += timerCheckTCPConnection_Elapsed;
-            timerCheckTCPConnection.Interval = 30000;
-            timerCheckTCPConnection.Enabled = true;
-        }
-
-        void timerCheckTCPConnection_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            Log("timerTCPConnectionCheck in progress");
-            ConnectToTCPServer();
-        }
-
-        private void ConnectToTCPServer()
-        {
-          
-            Log("Connecting...");
-            tcpClient.Connect("168.61.96.153", 9119, myClientID); //TODO: IP Address should be picked up directly from the database as it can change when the server reboots.
-            if (timerCheckTCPConnection.Enabled && tcpClient.isConnected)
-            {
-                timerCheckTCPConnection.Enabled = false;
-                Log("Killing timerTCPConnectionCheck");
-                if (Properties.Settings.Default.RememberMe) // Auto login if RememberMe is true
-                {
-                    SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
-                }
-                else
-                {
-                    Log("You need to login now.");
-                }
-            }
         }
 
 
@@ -135,7 +80,6 @@ namespace RaptorWebWalker
             Get,
             NOP,
         }
-
 
         #region Send Commands
 
@@ -159,7 +103,7 @@ namespace RaptorWebWalker
         {
             Log("Sending Data");
             lastCommand = command.Split(' ')[0].ToString();
-            tcpClient.SendData(utils.GetBytes(command));
+            // tcpClient.SendData(utils.GetBytes(command));
             SetLabel(lblLastCommand, lastCommand);
             LogToConOut(lastCommand);
         }
@@ -167,13 +111,7 @@ namespace RaptorWebWalker
         #endregion
 
 
-        void tcpClient_Disconnected()
-        {
-            if (!ClosingDown)
-            {
-                    ConnectToTCPServer();
-            }
-        }
+
 
         ////void tcpClient_errEncounter(Exception ex)
         ////{
@@ -192,278 +130,16 @@ namespace RaptorWebWalker
             SetMessageSize,
         }
 
-        //void tcpClient_DataReceived(byte[] Data, string ID)
-        //{
-        //    Log("Recieving Data");
-           
-        //    if (string.IsNullOrEmpty(ID)) // Message from the Server
-        //    {
-        //        string data = utils.GetString(Data);
-        //        string[] parts = data.Split(' ');
-
-        //        if (parts.Count() == 1)
-        //        {
-        //            ServerCommands commandReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[0].ToString());
-        //            switch (commandReceived)
-        //            {
-        //                case ServerCommands.Successful:
-        //                    break;
-        //                case ServerCommands.Failed:
-        //                    break;
-        //                case ServerCommands.UseCache:
-        //                    Waiting = true;
-        //                    break;
-        //                case ServerCommands.Wait:
-        //                    Waiting = true;
-        //                    break;
-        //                case ServerCommands.Resume:
-        //                    Waiting = false;
-        //                    break;
-        //                default:
-        //                    break;
-        //            }
-        //        }
-        //        else if (parts.Count() == 2)
-        //        {
-        //            // Received information about the command we sent - what happened?  
-        //            ServerCommands valueReceived;
-        //            ClientCommands commandSent;
-
-        //            try
-        //            {
-        //                commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
-        //                valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
-        //            }
-        //            catch (Exception)
-        //            {
-        //                // We do not always receive an answer to a question - sometimes the server sends a command without it being a reply to us
-        //                valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[0].ToString());
-        //                commandSent = ClientCommands.NOP;
-        //            }
 
 
-        //            switch (valueReceived)
-        //            {
-        //                case ServerCommands.Successful:
-        //                    break;
-        //                case ServerCommands.Failed:
-        //                    break;
-        //                case ServerCommands.UseCache:
-        //                    break;
-        //                case ServerCommands.Wait:
-        //                    break;
-        //                case ServerCommands.Resume:
-        //                    break;
-        //                case ServerCommands.SetMessageSize:
-        //                    SetReceiveMessageSize(parts);
-        //                    break;
-        //                default:
-        //                    break;
-        //            }
-
-        //            switch (commandSent)
-        //            {
-        //                case ClientCommands.Login:
-        //                    Log("Login Failed");
-        //                    LoginFailed(valueReceived);
-        //                    break;
-        //                case ClientCommands.Register:
-        //                    Log("Registration Failed");
-        //                    RegistrationFailed(valueReceived);
-        //                    break;
-
-        //                default:
-        //                    break;
-        //            }
-
-
-        //        }
-        //        else if (parts.Count() == 3)
-        //        {
-        //            // Received information about the command we sent - what happened?                    
-        //            ClientCommands commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
-        //            ServerCommands valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
-        //            string response = parts[2].ToString();
-        //            switch (commandSent)
-        //            {
-        //                case ClientCommands.Login:
-        //                    Log("Login Successful");
-        //                    LoginSuccessful(valueReceived, response);
-        //                    break;
-        //                case ClientCommands.Register:
-        //                    Log("Registration Successful");
-        //                    RegistrationSuccessful(valueReceived, response);
-        //                    break;
-        //                default:
-        //                    break;
-        //            }
-        //        }
-        //        else if (parts.Count() > 10)
-        //        {
-        //            ClientCommands commandSent = (ClientCommands)Enum.Parse(typeof(ClientCommands), parts[0].ToString());
-        //            ServerCommands valueReceived = (ServerCommands)Enum.Parse(typeof(ServerCommands), parts[1].ToString());
-        //            string response = parts[2].ToString();
-        //            switch (valueReceived)
-        //            {
-        //                case ServerCommands.Successful:
-        //                    Log("Get Successful");
-        //                    GetSuccessful(parts, commandSent);
-                            
-        //                    break;
-        //                case ServerCommands.Failed:
-        //                    Log("Get Failed");
-        //                    break;
-
-        //                default:
-        //                    break;
-        //            }
-
-        //        }
-        //        else
-        //        {
-        //            Log("Received: " + data);
-        //        }
-
-        //    }
-        //    else // Message from another user.
-        //    {
-        //        Log("Message from another user: " + ID);
-        //    }
-
-        //}
-
-        //private void GetSuccessful(string[] parts, ClientCommands commandSent)
-        //{
-        //    switch (commandSent)
-        //    {
-        //        case ClientCommands.Get:
-        //            {
-        //                for (int idx = 2; idx < 12; idx++)
-        //                {
-        //                    string url = parts[idx].ToString();
-        //                    if (!string.IsNullOrEmpty(url))
-        //                    {
-        //                        alUrls.Add(url);
-        //                    }
-        //                }
-        //                break;
-        //            }
-        //    }
-        //}
-
-        //private void RegistrationSuccessful(ServerCommands valueReceived, string response)
-        //{
-        //    switch (valueReceived)
-        //    {
-        //        case ServerCommands.Successful:
-        //            LoginRegisterFailedCounter = 0;
-        //            // Successfully Registered and Logged In.
-        //            SetLabel(lblAuthorized, "Authorised");
-        //            SetLabel(lblLicenseNumber, "License: " + response);
-        //            Properties.Settings.Default.IsAuthorised = true;
-                   
-        //            Send(ClientCommands.Get.ToString());
-        //            break;
-
-        //        default:
-        //            break;
-        //    }
-        //}
-
-        //private void LoginSuccessful(ServerCommands valueReceived, string response)
-        //{
-        //    switch (valueReceived)
-        //    {
-        //        case ServerCommands.Successful:
-        //            // Successfully Logged in.
-        //            LoginRegisterFailedCounter = 0;
-        //            SetLabel(lblAuthorized, "Authorised");
-        //            SetLabel(lblLicenseNumber, "License: " + response);
-        //            Properties.Settings.Default.IsAuthorised = true;
-        //            Send(ClientCommands.Get.ToString());
-                    
-        //            break;
-
-        //        default:
-        //            break;
-        //    }
-        //}
-
-        //private void SetReceiveMessageSize(string[] parts)
-        //{
-        //    Log("Increasing Message size to: " + parts[1].ToString());
-        //    tcpClient.ReceiveBufferSize = int.Parse(parts[1]);
-        //}
-
-        //private void LoginFailed(ServerCommands valueReceived)
-        //{
-        //    switch (valueReceived)
-        //    {
-        //        case ServerCommands.Failed:
-        //            if (LoginRegisterFailedCounter < 2)
-        //            {
-        //                LoginRegisterFailedCounter++;
-        //                SetLabel(lblAuthorized, "Unauthorised");
-        //                Properties.Settings.Default.IsAuthorised = false;
-        //                // If we have the user's details saved - try re-registering
-        //                if (!string.IsNullOrEmpty(Properties.Settings.Default.Password) && !string.IsNullOrEmpty(Properties.Settings.Default.Username))
-        //                {
-        //                    SendRegistration(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Ok the automatic system is not working for some reason. reset the saved details and show the login register form
-        //                Properties.Settings.Default.Password = string.Empty;
-        //                Properties.Settings.Default.Username = string.Empty;
-        //                ShowLoginForm();
-        //            }
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //}
-
-        //private void RegistrationFailed(ServerCommands valueReceived)
-        //{
-        //    switch (valueReceived)
-        //    {
-        //        case ServerCommands.Failed:
-        //            if (LoginRegisterFailedCounter < 2)
-        //            {
-        //                LoginRegisterFailedCounter++;
-        //                SetLabel(lblAuthorized, "Unauthorised");
-        //                Properties.Settings.Default.IsAuthorised = false;
-        //                // If we have the user details saved - try logging in instead.
-        //                if (!string.IsNullOrEmpty(Properties.Settings.Default.Password) && !string.IsNullOrEmpty(Properties.Settings.Default.Username))
-        //                {
-        //                    SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Ok the automatic system is not working for some reason. reset the saved details and show the login register form
-        //                Properties.Settings.Default.Password = string.Empty;
-        //                Properties.Settings.Default.Username = string.Empty;
-        //                ShowLoginForm();
-        //            }
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //}
-
-        //private void ProcessUrls()
-        //{
-        //    Log("Processing URLS");
-        //    throw new NotImplementedException();
-        //}
-
-
-        void tcpClient_Connected()
-        {          
-            Log("Connected to RaptorTCP Server");
+        private void ProcessUrls()
+        {
+            Log("Processing URLS");
+            throw new NotImplementedException();
         }
+
+
+
 
 
         #region Logging and UI Output
@@ -581,26 +257,14 @@ namespace RaptorWebWalker
             lblRuntimeSinceLastBoot.Text = utils.SecondsToDHMS(SecondsPastSinceBoot);
             lblTotalRuntime.Text = utils.SecondsToDHMS(totalRunTime);
             ThirtySeconds++;
-            
-            if(ThirtySeconds > 29 && tcpClient.isConnected)
-            {
-                ThirtySeconds = 0;
-                if (!Properties.Settings.Default.IsAuthorised)
-                    SendLogin(Properties.Settings.Default.Username, Properties.Settings.Default.Password);
-            }
-            else if(ThirtySeconds > 29 && !tcpClient.isConnected)
-            {
-                ThirtySeconds = 0;
-                ConnectToTCPServer();
-            }            
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Log("Application Closing");
             Properties.Settings.Default.IsAuthorised = false;
-            ClosingDown = true;
-            tcpClient.Disconnect();
+
+
             SaveSettings();
         }
 
@@ -637,6 +301,6 @@ namespace RaptorWebWalker
         }
         #endregion
 
-       
+
     }
 }
