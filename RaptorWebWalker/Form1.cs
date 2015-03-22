@@ -18,10 +18,9 @@ namespace RaptorWebWalker
 {
     public partial class frmMain : Form
     {
-
+        RaptorWebWalker.Classes.Cache.Cache Cache = new Classes.Cache.Cache();
         Utilities utils = new Utilities();
-        System.Timers.Timer timerCheckTCPConnection = new System.Timers.Timer();
-
+        
         delegate void SetTextCallback(string text);
         delegate void SetLabelCallBack(Label lbl, string text);
 
@@ -68,6 +67,42 @@ namespace RaptorWebWalker
 
         private void Startup()
         {
+            Log("Starting...");
+            
+            if(IstcpServerOnline())
+            {
+                if(IsCacheInUse())
+                {
+                    Cache.ProcessCache();
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+                if(IsCacheInUse())
+                {
+                    Cache.ProcessCache();
+                }
+                else
+                {
+                    Log("Waiting for TCP Server");
+                }
+            }
+        }
+
+        
+
+        private bool IsCacheInUse()
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool IstcpServerOnline()
+        {
+            // Send Hello and see if we get a response.
 
         }
 
